@@ -1,0 +1,89 @@
+-------------------------------------------------------------------------------------------------------------------------------------------
+3d Software Rendered Game
+
+The program is split into two parts: the engine and the game.
+
+The engine contains all of the functionality that can be reused in future games. It includes:
+	Windowing
+	Input
+	Basic entity system
+	Vector and matrix operations
+	Bitmap loading and manipulation
+	3d model loading and rendering
+	Camera
+	Lighting
+	Audio loading and manipulation (play, pause, etc.)
+	Collision detection (possibly response)
+	Loading fonts and displaying text
+	Displaying buttons and labels (GUI)
+	Scenes - pre-loaded sets of entities [NOT SURE ABOUT THIS ONE?]
+
+The game contains the game-specific code / functionality:
+	Specific entities (player, enemy, coin, etc.) and their behaviours.
+	Specific menus and scenes
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+Possible optimisations:
+Use Besenham's algorithm for line drawing instead of dda
+Use half-space method for triangle rasterisation instead of scanline/fill
+Use 128-bit SIMD registers (intrinsics?)
+Use transpose of inverse matrix for normal transformations instead of computing them as-needed with the cross-product
+Pre-calculate aspect ratio rather than re-calculating it each time
+-------------------------------------------------------------------------------------------------------------------------------------------
+Engine Classes:
+
+Window:
+	This class handles the creation of a window and render buffer. It is the only class able to directly access the render buffer,
+	and therefore acts as an interface to the render buffer for all other classes.
+	The window class is platform dependent. It should be one of the only platform-dependent classes. To allow this, it will also
+	handle other platform-dependent tasks such as event handling and retrieving input, and should provide interfaces for these to
+	all other classes.
+
+Renderer:
+	This class handles the calculations related to rendering. These include transformation, clipping, projection and rasterising primitives.
+	[NOTE: I might move primitive rasterisation to the Window class, but currently think it should remain in the renderer class because
+	the code for rendering primitives, given a DrawPixel function, will be the same on all platforms - this would only change if I needed
+	to use a hardware-accelerated API such as OpenGL, in which case, I would probably rewrite the whole engine to make use of OpenGL funcitonality,
+	e.g.through the use of the compute shader for collision detection]
+
+Bitmap:
+	Stores a bitmap image. Provides a static method for loading a bitmap image from a BMP file.
+
+Mesh:
+	Stores a 3d mesh. Provides a static method for loading a mesh from a .obj file.
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+To Fix:
+->Window layer bug
+	When the window is returned to windowed mode after being in fullscreen mode, it remains on the top layer even when other windows are dragged on top of it.
+	I fixed this by setting it to the bottom layer and then bringing it forward, but there might be a more efficient way to do this?
+	
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+Bug Reports:
+Fullscreen resolution bug:
+	When the window is set to fullscreen, the resolution retrieved with GetMonitorInfo is incorrect.
+	It is supposed to be 1920x1080 (the actual monitor resolution) but is instead set to 1536x864
+	
+	UPDATE 1:
+	This is because the display is set to 125% (the default) in the Windows settings. To compensate for
+	this, the window is set to 1/1.25 = 0.8 time smaller. In reality, all graphics are written to a memory
+	buffer which is smaller than the actual monitor resolution and scaled up 125% when it is written to the
+	actual screen buffer. Therefore, by converting from virtual coordinates to device coordinates, I may
+	be able to fix this error?
+	
+	UPDATE 2:
+	This is true for all windows, not just fullscreen ones. If I set the window size to 1536x864, it fills
+	the whole screen, even when not in fullscreen mode.
+	
+	UPDATE 3:
+	The bug does not seem to occur when the Visual Studio C++ compiler is used (in the developer command prompt).
+	This could be because MinGW is old and its version of Windows.h is not up-to-date.
+	It seems that when compiled with VS, the window coordinates are device coordinates, not virtual coordinates.
+	From now on, use VC++ compiler. 
+	
+Sources:
+Computer Graphics From Scratch by Gabriel Gambetta
+One Lone Coder 3d Engine Series: https://www.youtube.com/watch?v=ih20l3pJoeU
+Ryan Ries Game Series: https://www.youtube.com/watch?v=3zFFrBSdBvA&list=PLlaINRtydtNWuRfd4Ra3KeD6L9FP_tDE7
+Dan Zaidan Game Series: https://www.youtube.com/watch?v=M0yE4Kl85to&list=PL7Ej6SUky1357r-Lqf_nogZWHssXP-hvH

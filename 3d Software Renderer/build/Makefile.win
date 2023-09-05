@@ -1,0 +1,1 @@
+cl ./../src/main.cpp ./../src/Engine/Window.cpp ./../src/Engine/Renderer.cpp /link gdi32.lib user32.lib /out:./game.exe

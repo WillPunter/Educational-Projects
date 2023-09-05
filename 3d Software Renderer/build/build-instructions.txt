@@ -1,0 +1,8 @@
+To build with the Visual C++ compiler:
+	Open the Visual Studio Developer Command Prompt
+	Enter the following command:
+		cl /EHsc ./../src/main.cpp ./../src/Engine/Window.cpp ./../src/Engine/Renderer.cpp /link gdi32.lib user32.lib /out:./game.exe
+
+To build with MinGW compiler:
+	Use the following command:
+		g++ main.cpp ./Engine/Window.cpp ./Engine/Renderer.cpp -lgdi32 -o game
